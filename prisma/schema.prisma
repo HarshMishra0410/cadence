@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuthorValidation {
+  PENDING
+  CONFIRMED
+  DISPUTED
+}
+
+enum PostOwnerType {
+  CHEF
+  COMPANY
+}
+
+model Chef {
+  id        String   @id @default(cuid())
+  name      String
+  linkedinUrl String
+  position  String
+  intent    String?
+  email     String
+  createdAt DateTime @default(now())
+
+  /// Explicit posting target for this chef, posts/month. Null means "use the
+  /// 4/month fallback" — kept null rather than defaulted at write time so the
+  /// UI can distinguish an intentionally-set target from the fallback.
+  targetPostsPerMonth Int?
+
+  marketingPointers MarketingPointer[]
+  posts             Post[]
+}
+
+/// Singleton settings row for the Company's own LinkedIn presence.
+/// Always exactly one row (id fixed to "company").
+model Company {
+  id          String @id @default("company")
+  linkedinUrl String @default("")
+}
+
+model MarketingPointer {
+  id              String           @id @default(cuid())
+  /// Groups the different per-chef positionings of the same underlying story.
+  storyGroupId    String
+  name            String
+  whatHappened    String
+  contextBehind   String
+  author          String
+  positioning     String
+  importantLinks  String?
+  authorValidation AuthorValidation @default(PENDING)
+  postedAt        DateTime?
+  createdAt       DateTime         @default(now())
+
+  /// The planned date of posting — set via the "Schedule" action, distinct
+  /// from postedAt which only gets set once it's actually posted.
+  scheduledFor DateTime?
+
+  chefId String
+  chef   Chef   @relation(fields: [chefId], references: [id], onDelete: Cascade)
+
+  /// Set when this pick is marked posted — the Post record it produced.
+  post Post?
+
+  @@index([chefId])
+  @@index([storyGroupId])
+}
+
+model Post {
+  id        String        @id @default(cuid())
+  ownerType PostOwnerType
+  topic     String
+  content   String
+  link      String?
+  postedAt  DateTime      @default(now())
+
+  /// Populated when this row came from a LinkedIn analytics CSV import;
+  /// null for manually logged / mark-posted-created rows.
+  impressions Int?
+  source      String  @default("manual") // "manual" | "csv-import"
+
+  chefId String?
+  chef   Chef?   @relation(fields: [chefId], references: [id], onDelete: Cascade)
+
+  marketingPointerId String?           @unique
+  marketingPointer   MarketingPointer? @relation(fields: [marketingPointerId], references: [id], onDelete: SetNull)
+
+  @@index([chefId])
+  @@index([postedAt])
+}
