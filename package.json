@@ -13,23 +13,25 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@neon/config": "^1.2.0",
+    "@neon/env": "^1.2.0",
     "@prisma/client": "^6.19.3",
-    "next": "16.3.4",
-    "papaparse": "^5.7.0",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
-  },
-  "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.4",
+    "next": "16.3.4",
+    "papaparse": "^5.7.0",
     "prisma": "^6.19.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "eslint-config-next": "16.3.4"
   },
   "allowScripts": {
     "unrs-resolver@1.12.2": true,
