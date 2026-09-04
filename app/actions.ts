@@ -42,7 +42,8 @@ export async function createChef(formData: FormData) {
   });
 
   revalidatePath("/");
-  redirect("/");
+  revalidatePath("/linkedin");
+  redirect("/linkedin");
 }
 
 export async function updateChef(chefId: string, formData: FormData) {
@@ -63,6 +64,7 @@ export async function updateChef(chefId: string, formData: FormData) {
   });
 
   revalidatePath("/");
+  revalidatePath("/linkedin");
   revalidatePath(`/chef/${chefId}`);
   redirect(`/chef/${chefId}`);
 }
@@ -76,7 +78,7 @@ export async function updateCompany(formData: FormData) {
     update: { linkedinUrl },
     create: { id: "company", linkedinUrl },
   });
-  revalidatePath("/");
+  revalidatePath("/linkedin");
 }
 
 // ---- Marketing Pointer ("pick") ----
@@ -156,6 +158,7 @@ export async function markPointerPosted(pointerId: string, chefId: string, formD
   ]);
 
   revalidatePath("/");
+  revalidatePath("/linkedin");
   revalidatePath(`/chef/${chefId}`);
 }
 
@@ -216,6 +219,7 @@ export async function logPost(formData: FormData) {
   });
 
   revalidatePath("/");
+  revalidatePath("/linkedin");
   if (chefId) revalidatePath(`/chef/${chefId}`);
 }
 
@@ -252,6 +256,7 @@ export async function importPostsFromCsv(formData: FormData) {
   }
 
   revalidatePath("/");
+  revalidatePath("/linkedin");
   if (chefId) revalidatePath(`/chef/${chefId}`);
 
   const params = new URLSearchParams();
@@ -282,6 +287,7 @@ export async function createContentIdea(formData: FormData) {
   });
 
   revalidatePath("/website");
+  revalidatePath("/");
   redirect("/website");
 }
 
@@ -291,6 +297,7 @@ export async function markContentIdeaPublished(id: string) {
     data: { status: "PUBLISHED", publishedAt: new Date() },
   });
   revalidatePath("/website");
+  revalidatePath("/");
 }
 
 /**
@@ -311,4 +318,5 @@ export async function refreshWebsiteMetrics() {
   });
 
   revalidatePath("/website");
+  revalidatePath("/");
 }

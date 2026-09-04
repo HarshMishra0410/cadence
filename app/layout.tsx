@@ -50,7 +50,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             />
           </Link>
           <nav className="flex items-center gap-4 text-sm mono">
-            <Link href="/" style={{ color: "var(--clay-ink-soft)" }}>
+            <Link href="/linkedin" style={{ color: "var(--clay-ink-soft)" }}>
               LinkedIn
             </Link>
             <Link href="/website" style={{ color: "var(--clay-ink-soft)" }}>
