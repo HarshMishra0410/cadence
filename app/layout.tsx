@@ -32,7 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${quicksand.variable} ${inter.variable} ${jbmono.variable} h-full`}
     >
       <body className="min-h-full flex flex-col">
-        <header className="px-6 py-6">
+        <header className="px-6 py-6 flex items-center justify-between max-w-5xl w-full mx-auto">
           <Link href="/" className="inline-flex items-baseline gap-1">
             <span className="font-display font-bold text-2xl tracking-tight" style={{ color: "#0a0a0a" }}>
               Cadence
@@ -49,6 +49,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               }}
             />
           </Link>
+          <nav className="flex items-center gap-4 text-sm mono">
+            <Link href="/" style={{ color: "var(--clay-ink-soft)" }}>
+              LinkedIn
+            </Link>
+            <Link href="/website" style={{ color: "var(--clay-ink-soft)" }}>
+              Website Content
+            </Link>
+          </nav>
         </header>
         <main className="flex-1 px-6 pb-16 max-w-5xl w-full mx-auto">{children}</main>
       </body>

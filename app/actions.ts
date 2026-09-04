@@ -3,8 +3,9 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { AuthorValidation } from "@prisma/client";
+import type { AuthorValidation, ContentIdeaType } from "@prisma/client";
 import { parsePostsCsv } from "@/lib/csvImport";
+import { scrapeBlogCount, scrapeChangelogCount } from "@/lib/websiteMetrics";
 
 function str(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -261,4 +262,53 @@ export async function importPostsFromCsv(formData: FormData) {
     matchedColumns.map((m) => `${m.field}=${m.header ?? "(not found)"}`).join("|"),
   );
   redirect(`/import?${params.toString()}`);
+}
+
+// ---- Website content (blog/newsletter ideas + published-content metrics) ----
+
+export async function createContentIdea(formData: FormData) {
+  const type = str(formData, "type") as ContentIdeaType;
+  const topic = str(formData, "topic");
+  const content = str(formData, "content");
+  const author = str(formData, "author");
+  const link = optStr(formData, "link");
+
+  if (!type || !topic || !content || !author) {
+    throw new Error("Type, topic, content, and author are required.");
+  }
+
+  await prisma.contentIdea.create({
+    data: { type, topic, content, author, link },
+  });
+
+  revalidatePath("/website");
+  redirect("/website");
+}
+
+export async function markContentIdeaPublished(id: string) {
+  await prisma.contentIdea.update({
+    where: { id },
+    data: { status: "PUBLISHED", publishedAt: new Date() },
+  });
+  revalidatePath("/website");
+}
+
+/**
+ * Scrapes live blog/changelog counts from facets.cloud and pairs them with
+ * our own published-newsletter count (no public newsletter page exists to
+ * scrape), storing the result as a new snapshot so the chart can show
+ * change over time rather than just the latest number.
+ */
+export async function refreshWebsiteMetrics() {
+  const [blogCount, changelogCount, newsletterCount] = await Promise.all([
+    scrapeBlogCount(),
+    scrapeChangelogCount(),
+    prisma.contentIdea.count({ where: { type: "NEWSLETTER", status: "PUBLISHED" } }),
+  ]);
+
+  await prisma.websiteMetricSnapshot.create({
+    data: { blogCount, changelogCount, newsletterCount },
+  });
+
+  revalidatePath("/website");
 }

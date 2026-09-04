@@ -18,6 +18,16 @@ enum PostOwnerType {
   COMPANY
 }
 
+enum ContentIdeaType {
+  BLOG
+  NEWSLETTER
+}
+
+enum ContentIdeaStatus {
+  IDEA
+  PUBLISHED
+}
+
 model Chef {
   id        String   @id @default(cuid())
   name      String
@@ -92,4 +102,37 @@ model Post {
 
   @@index([chefId])
   @@index([postedAt])
+}
+
+/// A logged blog or newsletter idea — the "Website Content" queue, separate
+/// from LinkedIn picks. Marking one Published is what feeds the newsletter
+/// count in WebsiteMetricSnapshot, since there's no public newsletter page
+/// to scrape (unlike blog/changelog, which come from the live site).
+model ContentIdea {
+  id          String            @id @default(cuid())
+  type        ContentIdeaType
+  topic       String
+  content     String
+  author      String
+  link        String?
+  status      ContentIdeaStatus @default(IDEA)
+  createdAt   DateTime          @default(now())
+  publishedAt DateTime?
+
+  @@index([type])
+  @@index([status])
+}
+
+/// A point-in-time count of published website content, refreshed by
+/// scraping facets.cloud (blog, changelog) plus our own published
+/// newsletter ideas. Stored as snapshots so the chart can show change
+/// over time, not just a single static number.
+model WebsiteMetricSnapshot {
+  id              String   @id @default(cuid())
+  blogCount       Int?
+  changelogCount  Int?
+  newsletterCount Int
+  capturedAt      DateTime @default(now())
+
+  @@index([capturedAt])
 }
