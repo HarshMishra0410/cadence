@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { AuthorValidation, ContentIdeaType } from "@prisma/client";
 import { parsePostsCsv } from "@/lib/csvImport";
-import { scrapeBlogCount, scrapeChangelogCount } from "@/lib/websiteMetrics";
+import { scrapeBlogPosts, scrapeChangelogCount } from "@/lib/websiteMetrics";
 
 function str(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -301,22 +301,44 @@ export async function markContentIdeaPublished(id: string) {
 }
 
 /**
- * Scrapes live blog/changelog counts from facets.cloud and pairs them with
- * our own published-newsletter count (no public newsletter page exists to
- * scrape), storing the result as a new snapshot so the chart can show
- * change over time rather than just the latest number.
+ * Imports the full blog post list from facets.cloud (upserted by slug, so
+ * re-running updates existing posts and adds new ones without duplicating),
+ * scrapes the changelog count, and pairs both with our own
+ * published-newsletter count (no public newsletter page exists to scrape).
+ * blogCount is just the imported list's length — one scrape, one number,
+ * one list, no drift between them.
  */
 export async function refreshWebsiteMetrics() {
-  const [blogCount, changelogCount, newsletterCount] = await Promise.all([
-    scrapeBlogCount(),
+  const [blogPosts, changelogCount, newsletterCount] = await Promise.all([
+    scrapeBlogPosts(),
     scrapeChangelogCount(),
     prisma.contentIdea.count({ where: { type: "NEWSLETTER", status: "PUBLISHED" } }),
   ]);
 
+  if (blogPosts.length > 0) {
+    await prisma.$transaction(
+      blogPosts.map((post) =>
+        prisma.blogPost.upsert({
+          where: { slug: post.slug },
+          update: {
+            title: post.title,
+            description: post.description,
+            link: post.link,
+            author: post.author,
+            category: post.category,
+            publishedAt: post.publishedAt,
+          },
+          create: post,
+        }),
+      ),
+    );
+  }
+
   await prisma.websiteMetricSnapshot.create({
-    data: { blogCount, changelogCount, newsletterCount },
+    data: { blogCount: blogPosts.length || null, changelogCount, newsletterCount },
   });
 
   revalidatePath("/website");
+  revalidatePath("/website/blogs");
   revalidatePath("/");
 }

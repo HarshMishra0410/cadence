@@ -5,6 +5,9 @@ import ContentIdeaCard from "@/components/ContentIdeaCard";
 import WebsiteMetricsChart from "@/components/WebsiteMetricsChart";
 
 export const dynamic = "force-dynamic";
+// Refreshing pulls in ~97 blog posts (sitemap + one fetch per post, batched),
+// which takes longer than a typical serverless function's default timeout.
+export const maxDuration = 60;
 
 export default async function WebsitePage() {
   const [ideas, latestSnapshot] = await Promise.all([
@@ -13,7 +16,7 @@ export default async function WebsitePage() {
   ]);
 
   const metrics = [
-    { label: "Blogs", value: latestSnapshot?.blogCount ?? null, isLive: true },
+    { label: "Blogs", value: latestSnapshot?.blogCount ?? null, isLive: true, href: "/website/blogs" },
     { label: "Changelogs", value: latestSnapshot?.changelogCount ?? null, isLive: true },
     { label: "Newsletters", value: latestSnapshot?.newsletterCount ?? 0, isLive: false },
   ];

@@ -123,6 +123,24 @@ model ContentIdea {
   @@index([status])
 }
 
+/// One imported facets.cloud blog post, kept in sync by refreshWebsiteMetrics
+/// (upserted by slug). blogCount on WebsiteMetricSnapshot is just the count
+/// of these rows — one scrape, one source of truth for both the number and
+/// the list view.
+model BlogPost {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  description String?
+  link        String
+  author      String?
+  category    String?
+  publishedAt DateTime?
+  importedAt  DateTime  @default(now())
+
+  @@index([publishedAt])
+}
+
 /// A point-in-time count of published website content, refreshed by
 /// scraping facets.cloud (blog, changelog) plus our own published
 /// newsletter ideas. Stored as snapshots so the chart can show change
