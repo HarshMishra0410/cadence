@@ -9,7 +9,7 @@ import {
   momentumScore,
   overallHealthScore,
 } from "@/lib/health";
-import HeatmapPanel, { type PostSummary } from "@/components/HeatmapPanel";
+import HeatmapPanel, { type PostSummary, type ScheduledPickSummary } from "@/components/HeatmapPanel";
 import PickCard from "@/components/PickCard";
 import PostedPickCard from "@/components/PostedPickCard";
 import HealthStatusBadge from "@/components/HealthStatusBadge";
@@ -52,9 +52,15 @@ export default async function ChefPage({
     ownerName: chef.name,
     impressions: p.impressions,
   }));
-  const scheduledDates = picks
+  const scheduledPicks: ScheduledPickSummary[] = picks
     .filter((p) => p.scheduledFor)
-    .map((p) => p.scheduledFor!.toISOString());
+    .map((p) => ({
+      id: p.id,
+      scheduledFor: p.scheduledFor!.toISOString(),
+      name: p.name,
+      author: p.author,
+      positioning: p.positioning,
+    }));
 
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -198,7 +204,7 @@ export default async function ChefPage({
           </span>
         </div>
 
-        <HeatmapPanel posts={postSummaries} scheduledDates={scheduledDates} />
+        <HeatmapPanel posts={postSummaries} scheduledPicks={scheduledPicks} />
       </section>
 
       <section className="flex flex-col gap-4">

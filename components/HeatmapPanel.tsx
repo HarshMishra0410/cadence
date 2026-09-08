@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import CalendarMonth, { localDateKey } from "./CalendarMonth";
 import WeekStrip from "./WeekStrip";
 import DayPostsModal from "./DayPostsModal";
+import ScheduledPicksModal from "./ScheduledPicksModal";
 
 export type PostSummary = {
   id: string;
@@ -13,6 +14,14 @@ export type PostSummary = {
   link: string | null;
   ownerName: string;
   impressions: number | null;
+};
+
+export type ScheduledPickSummary = {
+  id: string;
+  scheduledFor: string; // ISO
+  name: string;
+  author: string;
+  positioning: string;
 };
 
 const SCALES = [
@@ -31,12 +40,12 @@ const MONTHS_BACK: Record<Scale, number> = { "1W": 0, "1M": 0, "3M": 2, "6M": 5,
 
 type Props = {
   posts: PostSummary[];
-  /** ISO dates of picks scheduled but not yet posted — marked yellow on the calendar. */
-  scheduledDates?: string[];
+  /** Picks scheduled but not yet posted — marked yellow on the calendar. */
+  scheduledPicks?: ScheduledPickSummary[];
   defaultScale?: Scale;
 };
 
-export default function HeatmapPanel({ posts, scheduledDates = [], defaultScale = "1M" }: Props) {
+export default function HeatmapPanel({ posts, scheduledPicks = [], defaultScale = "1M" }: Props) {
   const [scale, setScale] = useState<Scale>(defaultScale);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
@@ -51,22 +60,36 @@ export default function HeatmapPanel({ posts, scheduledDates = [], defaultScale 
     return m;
   }, [posts]);
 
+  const scheduledByDay = useMemo(() => {
+    const m = new Map<string, ScheduledPickSummary[]>();
+    for (const pick of scheduledPicks) {
+      const key = localDateKey(new Date(pick.scheduledFor));
+      const list = m.get(key);
+      if (list) list.push(pick);
+      else m.set(key, [pick]);
+    }
+    return m;
+  }, [scheduledPicks]);
+
   const counts = useMemo(() => {
     const m = new Map<string, number>();
     postsByDay.forEach((list, key) => m.set(key, list.length));
     return m;
   }, [postsByDay]);
 
-  const scheduledKeys = useMemo(() => {
-    return new Set(scheduledDates.map((d) => localDateKey(new Date(d))));
-  }, [scheduledDates]);
+  const scheduledKeys = useMemo(() => new Set(scheduledByDay.keys()), [scheduledByDay]);
 
   const today = new Date();
   const todayKey = localDateKey(today);
 
   const handleDayClick = (key: string) => {
-    if ((postsByDay.get(key)?.length ?? 0) > 0) setSelectedKey(key);
+    if ((postsByDay.get(key)?.length ?? 0) > 0 || (scheduledByDay.get(key)?.length ?? 0) > 0) {
+      setSelectedKey(key);
+    }
   };
+
+  const selectedPosts = selectedKey ? postsByDay.get(selectedKey) ?? [] : [];
+  const selectedScheduled = selectedKey ? scheduledByDay.get(selectedKey) ?? [] : [];
 
   return (
     <div className="flex flex-col gap-4">
@@ -121,12 +144,11 @@ export default function HeatmapPanel({ posts, scheduledDates = [], defaultScale 
         </div>
       )}
 
-      {selectedKey && (
-        <DayPostsModal
-          dateKey={selectedKey}
-          posts={postsByDay.get(selectedKey) ?? []}
-          onClose={() => setSelectedKey(null)}
-        />
+      {selectedKey && selectedPosts.length > 0 && (
+        <DayPostsModal dateKey={selectedKey} posts={selectedPosts} onClose={() => setSelectedKey(null)} />
+      )}
+      {selectedKey && selectedPosts.length === 0 && selectedScheduled.length > 0 && (
+        <ScheduledPicksModal dateKey={selectedKey} picks={selectedScheduled} onClose={() => setSelectedKey(null)} />
       )}
     </div>
   );

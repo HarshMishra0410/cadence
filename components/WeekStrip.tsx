@@ -30,7 +30,7 @@ export default function WeekStrip({ counts, todayKey, onDayClick, scheduledKeys 
         const count = counts.get(cell.key) ?? 0;
         const isScheduled = Boolean(scheduledKeys?.has(cell.key)) && count === 0;
         const isToday = cell.key === todayKey;
-        const clickable = count > 0 && Boolean(onDayClick);
+        const clickable = (count > 0 || isScheduled) && Boolean(onDayClick);
         return (
           <div
             key={cell.key}

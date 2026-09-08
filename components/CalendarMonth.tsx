@@ -67,7 +67,7 @@ export default function CalendarMonth({
           const isScheduled = Boolean(scheduledKeys?.has(cell.key)) && count === 0;
           const isFuture = Boolean(muteFuture) && cell.key > todayKey && !isScheduled;
           const isToday = cell.key === todayKey;
-          const clickable = count > 0 && !isFuture && Boolean(onDayClick);
+          const clickable = (count > 0 || isScheduled) && !isFuture && Boolean(onDayClick);
           return (
             <div
               key={cell.key}
