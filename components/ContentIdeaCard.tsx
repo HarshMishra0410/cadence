@@ -27,7 +27,7 @@ export default function ContentIdeaCard({ idea }: { idea: ContentIdea }) {
         </span>
       </div>
 
-      <p className="text-sm" style={{ color: "var(--clay-ink-soft)" }}>
+      <p className="text-sm whitespace-pre-wrap" style={{ color: "var(--clay-ink-soft)" }}>
         {idea.content}
       </p>
 

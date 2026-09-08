@@ -55,7 +55,7 @@ export default function DayPostsModal({ dateKey, posts, onClose }: Props) {
                   {post.ownerName}
                 </span>
               </div>
-              <p className="text-sm" style={{ color: "var(--clay-ink-soft)" }}>
+              <p className="text-sm whitespace-pre-wrap" style={{ color: "var(--clay-ink-soft)" }}>
                 {post.content}
               </p>
               {(post.impressions != null || post.link) && (

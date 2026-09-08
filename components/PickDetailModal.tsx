@@ -3,6 +3,15 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 
+/** Important links is a single free-text field — split on commas/newlines
+ * so multiple pasted URLs render as a real list instead of one run-on blob. */
+function splitLinks(text: string): string[] {
+  return text
+    .split(/[,\n]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 type Props = {
   name: string;
   meta: string;
@@ -88,7 +97,7 @@ export default function PickDetailModal({
                 <p className="text-xs mono uppercase" style={{ color: "var(--clay-ink-faint)" }}>
                   What happened
                 </p>
-                <p className="text-sm mt-1" style={{ color: "var(--clay-ink-soft)" }}>
+                <p className="text-sm mt-1 whitespace-pre-wrap" style={{ color: "var(--clay-ink-soft)" }}>
                   {whatHappened}
                 </p>
               </div>
@@ -96,7 +105,7 @@ export default function PickDetailModal({
                 <p className="text-xs mono uppercase" style={{ color: "var(--clay-ink-faint)" }}>
                   Context behind
                 </p>
-                <p className="text-sm mt-1" style={{ color: "var(--clay-ink-soft)" }}>
+                <p className="text-sm mt-1 whitespace-pre-wrap" style={{ color: "var(--clay-ink-soft)" }}>
                   {contextBehind}
                 </p>
               </div>
@@ -104,7 +113,7 @@ export default function PickDetailModal({
                 <p className="text-xs mono uppercase" style={{ color: "var(--clay-ink-faint)" }}>
                   Positioning
                 </p>
-                <p className="text-sm mt-1" style={{ color: "var(--clay-ink)" }}>
+                <p className="text-sm mt-1 whitespace-pre-wrap" style={{ color: "var(--clay-ink)" }}>
                   {positioning}
                 </p>
               </div>
@@ -113,9 +122,24 @@ export default function PickDetailModal({
                   <p className="text-xs mono uppercase" style={{ color: "var(--clay-ink-faint)" }}>
                     Important links
                   </p>
-                  <p className="text-sm mt-1 break-all" style={{ color: "var(--clay-accent-strong)" }}>
-                    {importantLinks}
-                  </p>
+                  <ul className="flex flex-col gap-1 mt-1">
+                    {splitLinks(importantLinks).map((link, i) => (
+                      <li key={i} className="text-sm break-all">
+                        {/^https?:\/\//.test(link) ? (
+                          <a
+                            href={link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: "var(--clay-accent-strong)" }}
+                          >
+                            {link}
+                          </a>
+                        ) : (
+                          <span style={{ color: "var(--clay-ink-soft)" }}>{link}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>

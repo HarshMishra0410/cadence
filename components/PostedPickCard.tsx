@@ -34,7 +34,10 @@ export default function PostedPickCard({ pick }: Props) {
           <ValidationBadge value={pick.authorValidation} />
         </div>
 
-        <p className="text-sm border-l-2 pl-3" style={{ borderColor: "var(--clay-accent-soft)", color: "var(--clay-ink-soft)" }}>
+        <p
+          className="text-sm border-l-2 pl-3 whitespace-pre-wrap line-clamp-3"
+          style={{ borderColor: "var(--clay-accent-soft)", color: "var(--clay-ink-soft)" }}
+        >
           {pick.positioning}
         </p>
       </PickDetailModal>

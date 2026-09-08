@@ -59,10 +59,13 @@ export default function PickCard({ pick }: { pick: MarketingPointer }) {
           <ValidationBadge value={pick.authorValidation} />
         </div>
 
-        <p className="text-sm" style={{ color: "var(--clay-ink-soft)" }}>
+        <p className="text-sm whitespace-pre-wrap line-clamp-3" style={{ color: "var(--clay-ink-soft)" }}>
           {pick.whatHappened}
         </p>
-        <p className="text-sm border-l-2 pl-3" style={{ borderColor: "var(--clay-accent-soft)", color: "var(--clay-ink)" }}>
+        <p
+          className="text-sm border-l-2 pl-3 whitespace-pre-wrap line-clamp-3"
+          style={{ borderColor: "var(--clay-accent-soft)", color: "var(--clay-ink)" }}
+        >
           {pick.positioning}
         </p>
       </PickDetailModal>
