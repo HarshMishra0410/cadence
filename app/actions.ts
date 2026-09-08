@@ -125,6 +125,37 @@ export async function updateAuthorValidation(pointerId: string, chefId: string, 
   revalidatePath(`/chef/${chefId}`);
 }
 
+export async function updateMarketingPointer(pointerId: string, chefId: string, formData: FormData) {
+  const name = str(formData, "name");
+  const whatHappened = str(formData, "whatHappened");
+  const contextBehind = str(formData, "contextBehind");
+  const author = str(formData, "author");
+  const positioning = str(formData, "positioning");
+  const importantLinks = optStr(formData, "importantLinks");
+
+  if (!name || !whatHappened || !contextBehind || !author || !positioning) {
+    throw new Error("All fields except important links are required.");
+  }
+
+  await prisma.marketingPointer.update({
+    where: { id: pointerId },
+    data: { name, whatHappened, contextBehind, author, positioning, importantLinks },
+  });
+
+  revalidatePath(`/chef/${chefId}`);
+  redirect(`/chef/${chefId}`);
+}
+
+/**
+ * Deleting a pick that's already been posted only unlinks its Post record
+ * (onDelete: SetNull in the schema) — the actual posted content and its
+ * place in the heatmap/summary feed stay intact.
+ */
+export async function deleteMarketingPointer(pointerId: string, chefId: string) {
+  await prisma.marketingPointer.delete({ where: { id: pointerId } });
+  revalidatePath(`/chef/${chefId}`);
+}
+
 /**
  * Marking a pick posted is the SAME action as logging its Post — one click
  * creates the linked Post record (powering the heatmap + summary feed) and

@@ -1,5 +1,6 @@
 import type { MarketingPointer, Post } from "@prisma/client";
 import { relativeTime } from "@/lib/time";
+import { deleteMarketingPointer } from "@/app/actions";
 import ValidationBadge from "./ValidationBadge";
 import PickDetailModal from "./PickDetailModal";
 
@@ -8,6 +9,8 @@ type Props = {
 };
 
 export default function PostedPickCard({ pick }: Props) {
+  const deletePick = deleteMarketingPointer.bind(null, pick.id, pick.chefId);
+
   return (
     <article className="clay-card p-5 flex flex-col gap-2 opacity-90">
       <PickDetailModal
@@ -18,6 +21,8 @@ export default function PostedPickCard({ pick }: Props) {
         positioning={pick.positioning}
         importantLinks={pick.importantLinks}
         badge={<ValidationBadge value={pick.authorValidation} />}
+        editHref={`/chef/${pick.chefId}/pick/${pick.id}/edit`}
+        deleteAction={deletePick}
       >
         <div className="flex items-start justify-between gap-3">
           <div>

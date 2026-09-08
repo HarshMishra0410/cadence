@@ -1,5 +1,11 @@
 import type { MarketingPointer, AuthorValidation } from "@prisma/client";
-import { updateAuthorValidation, markPointerPosted, schedulePointer, unschedulePointer } from "@/app/actions";
+import {
+  updateAuthorValidation,
+  markPointerPosted,
+  schedulePointer,
+  unschedulePointer,
+  deleteMarketingPointer,
+} from "@/app/actions";
 import { relativeTime } from "@/lib/time";
 import ValidationBadge from "./ValidationBadge";
 import PickDetailModal from "./PickDetailModal";
@@ -25,6 +31,7 @@ export default function PickCard({ pick }: { pick: MarketingPointer }) {
   const markPosted = markPointerPosted.bind(null, pick.id, pick.chefId);
   const schedule = schedulePointer.bind(null, pick.id, pick.chefId);
   const unschedule = unschedulePointer.bind(null, pick.id, pick.chefId);
+  const deletePick = deleteMarketingPointer.bind(null, pick.id, pick.chefId);
 
   return (
     <article
@@ -39,6 +46,8 @@ export default function PickCard({ pick }: { pick: MarketingPointer }) {
         positioning={pick.positioning}
         importantLinks={pick.importantLinks}
         badge={<ValidationBadge value={pick.authorValidation} />}
+        editHref={`/chef/${pick.chefId}/pick/${pick.id}/edit`}
+        deleteAction={deletePick}
       >
         <div className="flex items-start justify-between gap-3">
           <div>

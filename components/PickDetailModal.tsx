@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import Link from "next/link";
 
 type Props = {
   name: string;
@@ -10,6 +11,8 @@ type Props = {
   positioning: string;
   importantLinks: string | null;
   badge: ReactNode;
+  editHref: string;
+  deleteAction: () => Promise<void>;
   children: ReactNode;
 };
 
@@ -21,6 +24,8 @@ export default function PickDetailModal({
   positioning,
   importantLinks,
   badge,
+  editHref,
+  deleteAction,
   children,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -113,6 +118,28 @@ export default function PickDetailModal({
                   </p>
                 </div>
               )}
+            </div>
+
+            <div className="flex items-center justify-between gap-3 pt-2" style={{ borderTop: "1px solid var(--clay-bg-end)" }}>
+              <Link href={editHref} className="clay-btn text-sm px-4 py-2">
+                Edit
+              </Link>
+              <form
+                action={deleteAction}
+                onSubmit={(e) => {
+                  if (!confirm(`Delete "${name}"? This can't be undone.`)) {
+                    e.preventDefault();
+                  }
+                }}
+              >
+                <button
+                  type="submit"
+                  className="clay-btn text-sm px-4 py-2"
+                  style={{ background: "var(--bad-soft)", color: "var(--bad)" }}
+                >
+                  Delete
+                </button>
+              </form>
             </div>
           </div>
         </div>
